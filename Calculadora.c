@@ -1,6 +1,6 @@
 #include <18F4620.h>
 #fuses HS, NOFCMEN, NOIESO, PUT, NOBROWNOUT, NOWDT
-#fuses NOPBADEN, STVREN, NOLVP, NODEBUG
+#fuses NOPBADEN, STVREN, NOLVP, NODEBUG,
 #use delay(clock=16000000)
 #use fast_io(A)
 #use fast_io(B)
@@ -10,7 +10,14 @@ int8 datoC, datoD, interruptor;
 int16 resultado;
 #INT_RB
 void interrupt_isr(void){
-   interruptor=input_b();
+   if(input(pin_b4)==1)
+      interruptor=1;
+   if(input(pin_b5)==1)
+      interruptor=2;
+   if(input(pin_b6)==1)
+      interruptor=3;
+   if(input(pin_b7)==1)
+      interruptor=4;
 }
 
 void main (void){
@@ -19,32 +26,44 @@ void main (void){
    set_tris_C(0xFF);
    set_tris_D(0xFF);
    set_tris_E(0x08);
+   setup_oscillator(OSC_16MHZ);
    enable_interrupts(INT_RB);
    enable_interrupts(GLOBAL);
-   //ext_int_edge(L_TO_H);
    port_b_pullups(true);
-   datoC=input_c();
-   datoD=input_d();
    while (true){
+      datoC=input_c();
+      datoD=input_d();
       switch (interruptor){
-         case 0xE0:{
-            resultado=datoC + datoD;
-            output_a(resultado);
-            output_b(resultado>>6);
+         case 1:{
+            resultado=(int16)datoC + (int16)datoD;
+            interruptor=0;
          }break;
-         case 0xD0:{
-            resultado=datoC - datoD;
-            output_a(resultado);
+         case 2:{
+            if(datoD<=datoC){
+            resultado=(int16)datoC - (int16)datoD;
+            }
+            else{
+            resultado=(~(int16)datoD)+1;
+            resultado=resultado - (int16)datoC;
+            }
+            interruptor=0;
          }break;
-         case 0xB0:{
-            resultado=datoC * datoD;
-            output_a(resultado);
-            output_b(resultado>>6);
+         case 3:{
+            resultado=(int16)datoC * (int16)datoD;
+            interruptor=0;
          }break;
-         case 0x70:{
-            resultado=datoC + datoD;
-            output_a(resultado);
+         case 4:{
+            if(datoD!=0){
+            resultado=(int16)datoC / (int16)datoD;
+            }
+            else{
+            resultado=8191;
+            }
+            interruptor=0;
          }break;
       }
+      output_a(resultado);
+      output_b(resultado>>6);
+      output_e(resultado>>10);
    }
 }
