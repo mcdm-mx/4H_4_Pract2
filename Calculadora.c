@@ -6,7 +6,7 @@
 #use fast_io(B)
 #use fast_io(C)
 #use fast_io(D)
-int8 datoC, datoD, interruptor;
+unsigned int8 datoC, datoD, interruptor;
 int16 resultado;
 #INT_RB
 void interrupt_isr(void){
@@ -26,6 +26,7 @@ void main (void){
    set_tris_C(0xFF);
    set_tris_D(0xFF);
    set_tris_E(0x08);
+   setup_adc(NO_ANALOGS);
    setup_oscillator(OSC_16MHZ);
    enable_interrupts(INT_RB);
    enable_interrupts(GLOBAL);
@@ -39,13 +40,7 @@ void main (void){
             interruptor=0;
          }break;
          case 2:{
-            if(datoD<=datoC){
             resultado=(int16)datoC - (int16)datoD;
-            }
-            else{
-            resultado=(~(int16)datoD)+1;
-            resultado=resultado - (int16)datoC;
-            }
             interruptor=0;
          }break;
          case 3:{
