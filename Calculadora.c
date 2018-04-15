@@ -6,46 +6,50 @@
 #use fast_io(B)
 #use fast_io(C)
 #use fast_io(D)
-unsigned int8 datoC, datoD, interruptor;
+#use fast_io(E)
+unsigned int8 datoC, datoD, operacion;
 int16 resultado;
 #INT_RB
 void interrupt_isr(void){
-   if(input(pin_b4)==1)
-      interruptor=1;
-   if(input(pin_b5)==1)
-      interruptor=2;
-   if(input(pin_b6)==1)
-      interruptor=3;
-   if(input(pin_b7)==1)
-      interruptor=4;
+   if(input(PIN_B4)==1)
+      operacion=1;
+   if(input(PIN_B5)==1)
+      operacion=2;
+   if(input(PIN_B6)==1)
+      operacion=3;
+   if(input(PIN_B7)==1)
+      operacion=4;
 }
 
 void main (void){
-   set_tris_A(0xC0);
-   set_tris_B(0xF0);
-   set_tris_C(0xFF);
-   set_tris_D(0xFF);
-   set_tris_E(0x08);
+   set_tris_a(0xC0);
+   set_tris_b(0xF0);
+   set_tris_c(0xFF);
+   set_tris_d(0xFF);
+   set_tris_e(0x08);
    setup_adc(NO_ANALOGS);
    setup_oscillator(OSC_16MHZ);
    enable_interrupts(INT_RB);
    enable_interrupts(GLOBAL);
-   port_b_pullups(true);
-   while (true){
+   port_b_pullups(TRUE);
+   output_a(0x00);
+   output_b(0x00);
+   output_e(0x00);
+   while (TRUE){
       datoC=input_c();
       datoD=input_d();
-      switch (interruptor){
+      switch (operacion){
          case 1:{
             resultado=(int16)datoC + (int16)datoD;
-            interruptor=0;
+            operacion=0;
          }break;
          case 2:{
             resultado=(int16)datoC - (int16)datoD;
-            interruptor=0;
+            operacion=0;
          }break;
          case 3:{
             resultado=(int16)datoC * (int16)datoD;
-            interruptor=0;
+            operacion=0;
          }break;
          case 4:{
             if(datoD!=0){
@@ -54,7 +58,7 @@ void main (void){
             else{
             resultado=8191;
             }
-            interruptor=0;
+            operacion=0;
          }break;
       }
       output_a(resultado);
