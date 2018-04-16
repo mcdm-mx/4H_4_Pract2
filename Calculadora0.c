@@ -1,0 +1,46 @@
+#include <18F4620.h>
+#fuses HS, NOFCMEN, NOIESO, PUT, NOBROWNOUT, NOWDT
+#fuses NOPBADEN, STVREN, NOLVP, NODEBUG
+#use delay(clock=16000000)
+#use fast_io(A)
+#use fast_io(B)
+#use fast_io(C)
+#use fast_io(D)
+int8 datoC, datoD, interruptor;
+int16 resultado;
+#INT_RB
+void interrupt_isr(void){
+   interruptor=input_b();
+}
+
+void main (void){
+   set_tris_A(0xC0);
+   set_tris_B(0xF0);
+   set_tris_C(0xFF);
+   set_tris_D(0xFF);
+   set_tris_E(0x08);
+   enable_interrupts(INT_RB);
+   enable_interrupts(GLOBAL);
+   //ext_int_edge(L_TO_H);
+   port_b_pullups(true);
+   datoC=input_c();
+   datoD=input_d();
+   while (true){
+      switch (interruptor){
+         case 0xE0:{
+            resultado=datoC + datoD;
+         }break;
+         case 0xD0:{
+            resultado=datoC - datoD;
+         }break;
+         case 0xB0:{
+            resultado=datoC * datoD;
+         }break;
+         case 0x70:{
+            resultado=datoC / datoD;
+         }break;
+      }
+      output_a(resultado);
+      output_b(resultado>>6);
+   }
+}
