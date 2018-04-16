@@ -31,7 +31,7 @@ void main (void){
    setup_oscillator(OSC_16MHZ);
    enable_interrupts(INT_RB);
    enable_interrupts(GLOBAL);
-   port_b_pullups(TRUE);
+   port_b_pullups(FALSE);
    output_a(0x00);
    output_b(0x00);
    output_e(0x00);
